@@ -1,5 +1,4 @@
 package com.example.myapplication
-
 import kotlin.system.measureNanoTime
 
 inline fun runInline(times: Int, action: () -> Unit) {
@@ -8,7 +7,16 @@ inline fun runInline(times: Int, action: () -> Unit) {
     }
 }
 
-fun runNoInline(times: Int, action: () -> Unit) {
+inline fun runWithNoinline(
+    times: Int,
+    noinline action: () -> Unit
+) {
+    repeat(times) {
+        action()
+    }
+}
+
+fun runNormal(times: Int, action: () -> Unit) {
     repeat(times) {
         action()
     }
@@ -20,21 +28,33 @@ fun main() {
 
     println("Benchmark started...")
 
-
-    val inlineDurationNs = measureNanoTime {
+    // Inline test
+    val inlineTime = measureNanoTime {
         runInline(iterations) {
             counter += 1
         }
     }
-    println("Inline duration: ${inlineDurationNs / 1_000_000_000.0} s")
+    println("Inline duration: ${inlineTime / 1_000_000_000.0} s")
 
+    // Reset
     counter = 0
 
-
-    val noinlineDurationNs = measureNanoTime {
-        runNoInline(iterations) {
+    // Noinline test
+    val noinlineTime = measureNanoTime {
+        runWithNoinline(iterations) {
             counter += 1
         }
     }
-    println("Non-inline duration: ${noinlineDurationNs / 1_000_000_000.0} s")
+    println("Noinline duration: ${noinlineTime / 1_000_000_000.0} s")
+
+    // Reset
+    counter = 0
+
+    // Normal test
+    val normalTime = measureNanoTime {
+        runNormal(iterations) {
+            counter += 1
+        }
+    }
+    println("Normal (non-inline) duration: ${normalTime / 1_000_000_000.0} s")
 }
